@@ -14,7 +14,8 @@
    python evaluate_accuracy.py
    ```
 
-**使うテキストをconfig.pyで設定(qa1が医療用、qa2が一般的な文章)**　　
+**使うテキストをconfig.pyで設定(qa1が医療用、qa2が一般的な文章)**
+
 **類似度行列を作成(ファインチューニング前のモデル)**
    ```bash
    python calculate_similarity_matrix.py
