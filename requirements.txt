@@ -1,0 +1,10 @@
+torch
+transformers
+peft
+numpy
+pandas
+huggingface_hub
+tqdm
+scikit-learn
+plotly
+umap-learn
