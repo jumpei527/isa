@@ -14,21 +14,25 @@ path_configs = [
         "cka_matrix_path": f"outputs/{input_file}/cka_matrix/cka_matrix.csv",
         "accuracy_path": "outputs/evaluation_accuracy.csv",
         "output_path": f"outputs/{input_file}/krr_results/results.txt",
+        "predicted_output_path": f"outputs/{input_file}/krr_results/predicted_results.csv",
     },
     {
         "cka_matrix_path": f"outputs/{input_file}/cka_matrix/cka_matrix_finetune.csv",
         "accuracy_path": "outputs/evaluation_accuracy_finetune.csv",
         "output_path": f"outputs/{input_file}/krr_results/finetune_results.txt",
+        "predicted_output_path": f"outputs/{input_file}/krr_results/finetune_predicted_results.csv",
     },
     {
         "cka_matrix_path": f"outputs/{input_file}/cka_matrix/cka_matrix.csv",
         "accuracy_path": "outputs/evaluation_accuracy_diff.csv",
         "output_path": f"outputs/{input_file}/krr_results/diff_results.txt",
+        "predicted_output_path": f"outputs/{input_file}/krr_results/diff_predicted_results.csv",
     },
     {
         "cka_matrix_path": f"outputs/{input_file}/cka_matrix/cka_matrix.csv",
         "accuracy_path": "outputs/evaluation_accuracy_finetune.csv",
         "output_path": f"outputs/{input_file}/krr_results/results_before_cka_and_finetune_accuracy.txt",
+        "predicted_output_path": f"outputs/{input_file}/krr_results/predicted_results_before_cka_and_finetune_accuracy.csv",
     },
 ]
 
@@ -37,14 +41,17 @@ for config in path_configs:
     cka_matrix_path = config["cka_matrix_path"]
     accuracy_path = config["accuracy_path"]
     output_path = config["output_path"]
+    predicted_output_path = config["predicted_output_path"]
 
     # ディレクトリ作成
     dir_path = os.path.dirname(output_path)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
-    # カーネル行列の読み込み
-    K = pd.read_csv(cka_matrix_path, index_col=0).values
+    # カーネル行列の読み込み（行・列名付き）
+    kernel_df = pd.read_csv(cka_matrix_path, index_col=0)
+    K = kernel_df.values
+    model_names = kernel_df.index.tolist()  # モデル名を取得
 
     # Accuracy列を読み込み
     accuracy_df = pd.read_csv(accuracy_path)
@@ -63,6 +70,7 @@ for config in path_configs:
 
     # 精度記録用
     mse_list = []
+    predictions = []
 
     # 出力ファイルオープン
     with open(output_path, "w", encoding="utf-8") as f_out:
@@ -77,6 +85,7 @@ for config in path_configs:
             K_train = K[np.ix_(train_idx, train_idx)]
             K_test = K[np.ix_(test_idx, train_idx)]
             y_train, y_test = y[train_idx], y[test_idx]
+            test_model_names = [model_names[idx] for idx in test_idx]
 
             # カーネルリッジ回帰モデル
             model = KernelRidge(kernel='precomputed')
@@ -93,6 +102,15 @@ for config in path_configs:
             mse = mean_squared_error(y_test, y_test_pred)
             mse_list.append(mse)
 
+            # 予測結果を記録
+            for idx, (model_name, true_val, pred_val) in enumerate(zip(test_model_names, y_test, y_test_pred)):
+                predictions.append({
+                    "Split": i + 1,
+                    "Model Name": model_name,
+                    "True Value": true_val,
+                    "Predicted Value": pred_val,
+                })
+
             # ファイルへ書き込み
             f_out.write(f"Split {i+1}/{n_splits}  |  MSE = {mse:.4f}\n")
 
@@ -104,4 +122,8 @@ for config in path_configs:
         f_out.write(f"平均MSE         : {mse_mean:.4f}\n")
         f_out.write(f"MSEの標準偏差   : {mse_std:.4f}\n")
 
+    # 予測結果をCSVに保存
+    predictions_df = pd.DataFrame(predictions)
+    predictions_df.to_csv(predicted_output_path, index=False, encoding="utf-8")
     print(f"結果を '{output_path}' に保存しました。")
+    print(f"予測結果を '{predicted_output_path}' に保存しました。")

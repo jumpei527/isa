@@ -50,3 +50,8 @@
    ```bash
    python krr.py
    ```
+
+**カーネルリッジ回帰の結果を散布図で可視化**
+   ```bash
+   streamlit run visualize_krr.py
+   ```
