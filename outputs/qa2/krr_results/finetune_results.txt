@@ -1,0 +1,16 @@
+=== Kernel Ridge Regression (KRR) 結果 ===
+
+Split 1/10  |  MSE = 0.1397
+Split 2/10  |  MSE = 0.0738
+Split 3/10  |  MSE = 0.0668
+Split 4/10  |  MSE = 0.0514
+Split 5/10  |  MSE = 0.0469
+Split 6/10  |  MSE = 0.1284
+Split 7/10  |  MSE = 0.1243
+Split 8/10  |  MSE = 0.0713
+Split 9/10  |  MSE = 0.1024
+Split 10/10  |  MSE = 0.1628
+
+--- 最終結果 ---
+平均MSE         : 0.0968
+MSEの標準偏差   : 0.0382

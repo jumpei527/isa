@@ -41,6 +41,11 @@
    python visualize_cka.py
    ```
 
+**ファインチューニング前と後の精度の差分を出力**
+   ```bash
+   python calculate_accuracy_diff.py
+   ```
+
 **CKA行列からカーネルリッジ回帰**
    ```bash
    python krr.py
