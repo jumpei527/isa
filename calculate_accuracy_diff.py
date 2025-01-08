@@ -39,7 +39,6 @@ with open(output_csv, "w", encoding="utf-8", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["Model_ID", "Accuracy_diff"])
     for model_id, diff in diff_results:
-        # f"{diff:.2f}" のようにフォーマットして書き込んでもOK
         writer.writerow([model_id, f"{diff:.2f}"])
 
 print(f"差分計算が完了しました。'{output_csv}' に出力しています。")
