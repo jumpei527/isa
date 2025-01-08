@@ -98,3 +98,46 @@ for matrix_name, file_path, accuracy_path in matrix_files:
     
     # Streamlitに教師なしプロットを表示
     st.plotly_chart(fig_unsupervised)
+
+
+# cka_matrix.csvを使用してevaluation_accuracy.csvで教師あり次元削減し、カラーをevaluation_accuracy_finetune.csvで色分け
+matrix_df = pd.read_csv(f"outputs/{input_file}/cka_matrix/cka_matrix.csv", index_col=0)
+matrix_df.index = matrix_df.index.str.replace(".csv", "", regex=False)
+
+accuracy_supervised = pd.read_csv("outputs/evaluation_accuracy.csv").set_index('Model_ID')
+accuracy_supervised.index = accuracy_supervised.index.str.replace('/', '_', regex=False)
+
+accuracy_finetune = pd.read_csv("outputs/evaluation_accuracy_finetune.csv").set_index('Model_ID')
+accuracy_finetune.index = accuracy_finetune.index.str.replace('/', '_', regex=False)
+
+reordered_supervised = accuracy_supervised.reindex(matrix_df.index)
+reordered_finetune = accuracy_finetune.reindex(matrix_df.index)
+
+if reordered_supervised.isnull().any().any() or reordered_finetune.isnull().any().any():
+    st.error("Model IDs in cka_matrix.csv do not match those in accuracy files.")
+    st.write("CKA Matrix Model IDs:", matrix_df.index.tolist())
+    st.write("Supervised Accuracy Model IDs:", accuracy_supervised.index.tolist())
+    st.write("Finetune Accuracy Model IDs:", accuracy_finetune.index.tolist())
+else:
+    y_supervised = reordered_supervised['Accuracy'].values
+    color_finetune = reordered_finetune['Accuracy'].values
+    
+    reducer_combined = umap.UMAP(n_neighbors=perplexity, metric='euclidean', random_state=42)
+    embedding_combined = reducer_combined.fit_transform(matrix_df.values, y=y_supervised)
+    
+    combined_df = pd.DataFrame(embedding_combined, columns=['UMAP1', 'UMAP2'], index=matrix_df.index)
+    combined_df['Color'] = color_finetune
+    combined_df['Model'] = combined_df.index  # ツールチップ用
+    
+    fig_combined = px.scatter(
+        combined_df,
+        x='UMAP1',
+        y='UMAP2',
+        color='Color',
+        hover_data={'UMAP1': False, 'UMAP2': False, 'Model': True, 'Color': True},
+        title="cka_matrix (カラー: ファインチューニング後)",
+        labels={'Color': 'Finetune Accuracy'},
+        color_continuous_scale='Viridis'
+    )
+    
+    st.plotly_chart(fig_combined)
