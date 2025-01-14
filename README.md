@@ -55,3 +55,13 @@
    ```bash
    streamlit run visualize_krr.py
    ```
+
+**cka行列を教師ありUMAPで可視化（精度を教師とする）**
+   ```bash
+   streamlit run visualize_cka_supervised_umap.py
+   ```
+
+**clsトークンベクトルを保存**
+   ```bash
+   python extract_cls_vectors.py
+   ```
